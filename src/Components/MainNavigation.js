@@ -1,9 +1,13 @@
 import { makeStyles } from '@mui/styles'
-import React from 'react'
+import React, { Fragment, useContext } from 'react'
 import { Link } from 'react-router-dom'
+
+import AuthContext from '../Contexts/auth-context'
 
 const MainNavigation = () => {
   const classes = useStyles()
+  const { isLoggedIn } = useContext(AuthContext)
+
   return (
     <header className={classes.header}>
       <Link to='/' >
@@ -13,19 +17,26 @@ const MainNavigation = () => {
       </Link>
       <nav>
         <ul className={classes.headerUl} >
-          <li className={classes.headerLi}>
-            <Link to='/auth' style={{
-              color: 'white', textDecoration: 'none'
-            }} >Login</Link>
-          </li>
-          <li className={classes.headerLi} >
-            <Link to='/profile' style={{
-              color: 'white', textDecoration: 'none'
-            }} >Profile</Link>
-          </li>
-          <li>
-            <button className={classes.button} >Logout</button>
-          </li>
+          {!isLoggedIn && (
+            <li className={classes.headerLi}>
+              <Link to='/auth' style={{
+                color: 'white', textDecoration: 'none'
+              }} >Login
+              </Link>
+            </li>
+          )}
+          {isLoggedIn && (
+            <Fragment>
+              <li className={classes.headerLi} >
+                <Link to='/profile' style={{
+                  color: 'white', textDecoration: 'none'
+                }} >Profile</Link>
+              </li>
+              <li>
+                <button className={classes.button} >Logout</button>
+              </li>
+            </Fragment>
+          )}
         </ul>
       </nav>
     </header>

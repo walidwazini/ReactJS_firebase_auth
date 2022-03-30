@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useContext } from 'react'
 
+import AuthContext from '../../Contexts/auth-context'
 import classes from './AuthForm.module.css'
 
 const AuthForm = () => {
@@ -10,6 +11,8 @@ const AuthForm = () => {
   const logInEmailPwUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false)
+
+  const authCtx = useContext(AuthContext)
 
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
@@ -50,8 +53,8 @@ const AuthForm = () => {
         throw new Error(errorMessage)
       }
     }).then(data => {
-      // todo if req succesful
       console.log(data)
+      authCtx.login(data)
     }).catch(err => {
       if (err.message === 'EMAIL_EXISTS') {
         alert('The email already exist')
