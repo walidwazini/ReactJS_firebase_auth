@@ -6,8 +6,10 @@ const AuthForm = () => {
   const emailInputRef = useRef()
   const passwordInputRef = useRef()
   const apiKey = ''
-  const endpointEmailPw = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`
+  const signUpEmailPwUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`
+  const logInEmailPwUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false)
 
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
@@ -18,30 +20,45 @@ const AuthForm = () => {
     const enteredEmail = emailInputRef.current.value
     const enteredPassword = passwordInputRef.current.value
 
-
+    setIsLoading(true)
+    let endpointUrl;
     if (isLogin) {
-
+      endpointUrl = logInEmailPwUrl
     } else {
-      fetch(endpointEmailPw, {
-        method: 'POST',
-        body: JSON.stringify({
-          email: enteredEmail,
-          password: enteredPassword,
-          returnSecureToken: true
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }).then(res => {
-        if (res.ok) {
-
-        } else {
-          return res.json().then(data => {
-            console.log(data)
-          })
-        }
-      })
+      endpointUrl = signUpEmailPwUrl
     }
+    fetch(endpointUrl, {
+      method: 'POST',
+      body: JSON.stringify({
+        email: enteredEmail,
+        password: enteredPassword,
+        returnSecureToken: true
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(async res => {
+      if (res.ok) {
+        // ....
+      } else {
+        const data = await res.json()
+        let errorMessage = 'Authentication failed.'
+
+        if (data && data.error && data.error.message) {
+          errorMessage = data.error.message
+        }
+        throw new Error(errorMessage)
+      }
+    }).then(data => {
+      // todo if req succesful
+      console.log(data)
+    }).catch(err => {
+      if (err.message === 'EMAIL_EXISTS') {
+        alert('The email already exist')
+      } else {
+        alert(err.message)
+      }
+    })
   }
 
   return (
@@ -57,7 +74,10 @@ const AuthForm = () => {
           <input ref={passwordInputRef} type='password' id='password' required />
         </div>
         <div className={classes.actions}>
-          <button>{isLogin ? 'Login' : 'Create Account'}</button>
+          {
+            !isLoading && <button>{isLogin ? 'Login' : 'Create Account'}</button>
+          }
+          {isLoading && <p style={{ color: 'white' }}>Loading...</p>}
           <button
             type='button'
             className={classes.toggle}
