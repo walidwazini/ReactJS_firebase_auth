@@ -1,9 +1,11 @@
 import React, { useRef, useState, useContext } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import AuthContext from '../../Contexts/auth-context'
 import classes from './AuthForm.module.css'
 
 const AuthForm = () => {
+  const navigate = useNavigate()
   const emailInputRef = useRef()
   const passwordInputRef = useRef()
   const apiKey = ''
@@ -53,8 +55,9 @@ const AuthForm = () => {
         throw new Error(errorMessage)
       }
     }).then(data => {
-      console.log(data)
-      authCtx.login(data)
+      console.log(data.idToken)
+      authCtx.login(data.isToken)
+      navigate('/')
     }).catch(err => {
       if (err.message === 'EMAIL_EXISTS') {
         alert('The email already exist')
